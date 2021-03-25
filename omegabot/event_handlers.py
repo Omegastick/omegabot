@@ -16,5 +16,8 @@ async def on_ready():
 
 @bot.event
 async def on_message(message: Message):
-    if message.author.name == "Salaah01":
+    if message.author.id == 136999062519021568:
         await message.channel.send("I am beyond your commands")
+        return
+
+    await bot.process_commands(message)
