@@ -7,9 +7,8 @@ from discord.ext.commands import Context, has_permissions
 from DiscordUtils.Pagination import CustomEmbedPaginator
 
 from omegabot.app import bot
-from omegabot.models import User
 from omegabot.services.points import add_points
-from omegabot.services.user import get_or_create_user
+from omegabot.services.user import get_leaderboard_users, get_or_create_user
 
 LOG = logging.getLogger(__name__)
 
@@ -20,16 +19,16 @@ PAGE_SIZE = 10
 @has_permissions(manage_guild=True)
 async def give(ctx: Context, discord_user: DiscordUser, amount: int):
     LOG.info(f"Giving {amount} points to {discord_user.name}")
-    command_user = get_or_create_user(ctx.author)
-    target_user = get_or_create_user(discord_user)
-    target_user = add_points(command_user, target_user, amount)
+    command_user = get_or_create_user(ctx.author, ctx.guild)
+    target_user = get_or_create_user(discord_user, ctx.guild)
+    target_user = add_points(command_user, target_user, ctx.guild, amount)
     await ctx.send(f"Giving {discord_user.mention} {amount} points. They now have {target_user.points} points.")
 
 
 @bot.command()
 async def leaderboard(ctx: Context):
     LOG.info("Printing leaderboard")
-    users: List[User] = User.select().order_by(User.points.desc())
+    users = get_leaderboard_users(ctx.guild)
     paged_users = [users[i : i + PAGE_SIZE] for i in range(0, len(users), PAGE_SIZE)]
     embeds: List[Embed] = []
     for i, page in enumerate(paged_users):

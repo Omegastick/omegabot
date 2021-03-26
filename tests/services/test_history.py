@@ -6,19 +6,20 @@ COMMAND_USER_ID = 123
 COMMAND_USERNAME = "COMMAND_USER"
 TARGET_USER_ID = 234
 TARGET_USERNAME = "TARGET_USER"
+GUILD_ID = 345
 POINTS_COUNT = 10
 
 
 @pytest.fixture
 def command_user():
-    user = User.create(id=COMMAND_USER_ID, name=COMMAND_USERNAME)
+    user = User.create(discord_id=COMMAND_USER_ID, guild_id=GUILD_ID, name=COMMAND_USERNAME)
     user.save()
     return user
 
 
 @pytest.fixture
 def target_user():
-    user = User.create(id=TARGET_USER_ID, name=TARGET_USERNAME)
+    user = User.create(discord_id=TARGET_USER_ID, guild_id=GUILD_ID, name=TARGET_USERNAME)
     user.save()
     return user
 

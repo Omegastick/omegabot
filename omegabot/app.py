@@ -7,7 +7,7 @@ from peewee import SqliteDatabase
 
 LOG = logging.getLogger(__name__)
 
-bot = Bot(command_prefix="#", intents=Intents.all())
+bot = Bot(command_prefix="*", intents=Intents.all())
 db = SqliteDatabase("omegabot.db")
 
 
