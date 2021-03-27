@@ -17,7 +17,6 @@ LOTS_OF_POINTS = 345
 @pytest.fixture
 def database_user() -> User:
     user = User.create(discord_id=USER_ID, guild_id=GUILD_ID, name=USERNAME, points=LOTS_OF_POINTS)
-    user.save()
     return user
 
 
