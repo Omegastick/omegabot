@@ -1,0 +1,9 @@
+version: '3.7'
+services:
+  omegabot:
+    build: .
+    environment:
+      DATABASE_FILE: "/db/omegabot.db"
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+    volumes:
+      - "./db:/db"
