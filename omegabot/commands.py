@@ -10,6 +10,7 @@ from DiscordUtils.Pagination import CustomEmbedPaginator
 from omegabot.app import bot
 from omegabot.services.points import add_points, recalculate_leader, set_point_leader_role
 from omegabot.services.user import get_leaderboard_users, get_or_create_user
+from omegabot.services.welcome_message import set_welcome_message
 
 LOG = logging.getLogger(__name__)
 
@@ -56,3 +57,10 @@ async def leaderboard(ctx: Context):
     paginator.add_reaction("⏪", "back")
     paginator.add_reaction("⏩", "next")
     await paginator.run(embeds)
+
+
+@bot.command()
+@has_permissions(manage_guild=True)
+async def welcome_message(ctx: Context, message: str):
+    set_welcome_message(ctx.channel, message)
+    await ctx.channel.send("Welcome message set")

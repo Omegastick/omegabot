@@ -1,8 +1,10 @@
 import logging
 
-from discord import Message
+from discord import Embed, Member, Message
+from discord.channel import TextChannel
 
 from omegabot.app import bot
+from omegabot.models import WelcomeMessage
 
 LOG = logging.getLogger(__name__)
 
@@ -21,3 +23,15 @@ async def on_message(message: Message):
         return
 
     await bot.process_commands(message)
+
+
+@bot.event
+async def on_member_join(member: Member):
+    message = WelcomeMessage.get_or_none(WelcomeMessage.guild_id == member.guild.id)
+    if not message:
+        return
+    channel: TextChannel = bot.get_channel(message.channel_id)
+    embed = Embed()
+    embed.set_image(url=member.avatar_url)
+    await channel.send(embed=embed)
+    await channel.send(message.message.replace("{user}", member.mention))
