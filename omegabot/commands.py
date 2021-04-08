@@ -1,16 +1,16 @@
 import logging
-from typing import List
 
-from discord import Embed
 from discord import Role as DiscordRole
 from discord import User as DiscordUser
 from discord.ext.commands import Context, has_permissions
 from DiscordUtils.Pagination import CustomEmbedPaginator
 
 from omegabot.app import bot
+from omegabot.presentation import make_leaderboard
 from omegabot.services.points import add_points, recalculate_leader, set_point_leader_role
-from omegabot.services.user import get_leaderboard_users, get_or_create_user
+from omegabot.services.user import get_leaderboard_users, get_or_create_user, get_xp_leaderboard_users
 from omegabot.services.welcome_message import set_welcome_message
+from omegabot.services.xp import level_to_xp, xp_to_level
 
 LOG = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ async def give(ctx: Context, discord_user: DiscordUser, amount: int):
     LOG.info(f"Giving {amount} points to {discord_user.name}")
     command_user = get_or_create_user(ctx.author, ctx.guild)
     target_user = get_or_create_user(discord_user, ctx.guild)
-    target_user = add_points(command_user, target_user, ctx.guild, amount)
+    target_user = add_points(command_user, target_user, amount)
     message = f"Giving {discord_user.mention} {amount} points. They now have {target_user.points} points."
     new_leader = await recalculate_leader(ctx.guild)
     if new_leader == target_user:
@@ -43,16 +43,9 @@ async def set_leader_role(ctx: Context, role: DiscordRole):
 async def leaderboard(ctx: Context):
     LOG.info("Printing leaderboard")
     users = get_leaderboard_users(ctx.guild)
-    paged_users = [users[i : i + PAGE_SIZE] for i in range(0, len(users), PAGE_SIZE)]
-    embeds: List[Embed] = []
-    for i, page in enumerate(paged_users):
-        embed = Embed()
-        embed.title = "Points Leaderboard"
-        embed.description = "\n".join(
-            [f"{i * PAGE_SIZE + j + 1}: {user.name} - {user.points}" for j, user in enumerate(page)]
-        )
-        embed.description += f"\n\nPage {i + 1} of {len(paged_users)}"
-        embeds.append(embed)
+    embeds = make_leaderboard(
+        "Points leaderboard", [user.name for user in users], [user.points for user in users], PAGE_SIZE
+    )
     paginator = CustomEmbedPaginator(ctx, remove_reactions=True)
     paginator.add_reaction("⏪", "back")
     paginator.add_reaction("⏩", "next")
@@ -64,3 +57,29 @@ async def leaderboard(ctx: Context):
 async def welcome_message(ctx: Context, message: str):
     set_welcome_message(ctx.channel, message)
     await ctx.channel.send("Welcome message set")
+
+
+@bot.command()
+async def xp(ctx: Context):
+    user = get_or_create_user(ctx.author, ctx.guild)
+    current_level = xp_to_level(user.xp)
+    current_level_xp = level_to_xp(current_level)
+    next_level_xp = level_to_xp(current_level + 1)
+    current_level_size = next_level_xp - current_level_xp
+    xp_to_next_level = next_level_xp - user.xp
+    percent_complete = int((current_level_size - xp_to_next_level) / current_level_size * 100)
+    await ctx.channel.send(
+        f"{ctx.author.mention}, you are level {current_level} with {user.xp} XP. "
+        f"You are {percent_complete}% of the way to the next level ({xp_to_next_level} XP)."
+    )
+
+
+@bot.command()
+async def xp_leaderboard(ctx: Context):
+    LOG.info("Printing XP leaderboard")
+    users = get_xp_leaderboard_users(ctx.guild)
+    embeds = make_leaderboard("XP leaderboard", [user.name for user in users], [user.xp for user in users], PAGE_SIZE)
+    paginator = CustomEmbedPaginator(ctx, remove_reactions=True)
+    paginator.add_reaction("⏪", "back")
+    paginator.add_reaction("⏩", "next")
+    await paginator.run(embeds)

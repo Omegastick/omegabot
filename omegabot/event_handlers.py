@@ -5,6 +5,8 @@ from discord.channel import TextChannel
 
 from omegabot.app import bot
 from omegabot.models import WelcomeMessage
+from omegabot.services.user import get_or_create_user
+from omegabot.services.xp import add_xp, xp_to_level
 
 LOG = logging.getLogger(__name__)
 
@@ -18,9 +20,20 @@ async def on_ready():
 
 @bot.event
 async def on_message(message: Message):
+    if message.author.bot:
+        return
+
     if message.author.id == 136999062519021568:
         await message.channel.send("I am beyond your commands")
         return
+
+    user = get_or_create_user(message.author, message.guild)
+    old_level = xp_to_level(user.xp)
+    message_contains_image = bool(message.attachments) or bool(message.embeds)
+    user = add_xp(user, 5 if message_contains_image else 1)
+    new_level = xp_to_level(user.xp)
+    if new_level > old_level:
+        await message.channel.send(f"Congrats {message.author.mention}! You leveled up to level {new_level} 🎉")
 
     await bot.process_commands(message)
 

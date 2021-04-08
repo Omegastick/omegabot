@@ -5,7 +5,8 @@ import pytest
 from discord import Guild
 from discord import User as DiscordUser
 from omegabot.models import User
-from omegabot.services.user import get_leaderboard_users, get_or_create_user
+from omegabot.services.user import (get_leaderboard_users, get_or_create_user,
+                                    get_xp_leaderboard_users)
 
 USERNAME = "TEST_USERNAME"
 USER_ID = 123
@@ -24,9 +25,9 @@ def database_user() -> User:
 def database_user_list() -> List[User]:
     users = []
     for i in range(10):
-        users.append(User.create(discord_id=USER_ID + i, guild_id=GUILD_ID, name="Guild 1 User", points=i))
+        users.append(User.create(discord_id=USER_ID + i, guild_id=GUILD_ID, name="Guild 1 User", points=i, xp=i))
     for i in range(10):
-        users.append(User.create(discord_id=USER_ID + i, guild_id=GUILD_ID + 1, name="Guild 2 User", points=i))
+        users.append(User.create(discord_id=USER_ID + i, guild_id=GUILD_ID + 1, name="Guild 2 User", points=i, xp=i))
     return users
 
 
@@ -102,5 +103,27 @@ def test_get_leaderboard_users_returns_users_in_points_order(guild: Guild, datab
 
 def test_get_leaderboard_users_returns_all_users_in_guild(guild: Guild, database_user_list: List[User]):
     users = get_leaderboard_users(guild)
+
+    assert len(users) == 10
+
+
+def test_get_xp_leaderboard_users_returns_users_from_correct_guild(guild: Guild, database_user_list: List[User]):
+    users = get_xp_leaderboard_users(guild)
+
+    for user in users:
+        assert user.guild_id == guild.id
+
+
+def test_get_xp_leaderboard_users_returns_users_in_points_order(guild: Guild, database_user_list: List[User]):
+    users = get_xp_leaderboard_users(guild)
+
+    last_xp = float("INFINITY")
+    for user in users:
+        assert user.xp <= last_xp
+        last_xp = user.xp
+
+
+def test_get_xp_leaderboard_users_returns_all_users_in_guild(guild: Guild, database_user_list: List[User]):
+    users = get_xp_leaderboard_users(guild)
 
     assert len(users) == 10

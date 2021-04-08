@@ -23,3 +23,7 @@ def get_or_create_user(discord_user: DiscordUser, guild: Guild) -> User:
 
 def get_leaderboard_users(guild: Guild) -> List[User]:
     return User.select().where(User.guild_id == guild.id).order_by(User.points.desc())
+
+
+def get_xp_leaderboard_users(guild: Guild) -> List[User]:
+    return User.select().where(User.guild_id == guild.id).order_by(User.xp.desc())
