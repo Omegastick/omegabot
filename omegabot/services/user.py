@@ -13,7 +13,7 @@ def get_or_create_user(discord_user: DiscordUser, guild: Guild) -> User:
         discord_id=discord_user.id, guild_id=guild.id, defaults={"name": discord_user.name}
     )
     if created:
-        LOG.info(f"Creating user {discord_user.name}")
+        LOG.info(f"Created user {discord_user.name}")
     if user.name != discord_user.name:
         LOG.info(f"Changing name for user {user.name} to {discord_user.name}")
         user.name = discord_user.name
