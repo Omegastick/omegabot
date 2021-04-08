@@ -78,7 +78,12 @@ async def xp(ctx: Context):
 async def xp_leaderboard(ctx: Context):
     LOG.info("Printing XP leaderboard")
     users = get_xp_leaderboard_users(ctx.guild)
-    embeds = make_leaderboard("XP leaderboard", [user.name for user in users], [user.xp for user in users], PAGE_SIZE)
+    embeds = make_leaderboard(
+        "XP leaderboard",
+        [user.name for user in users],
+        [f"Level: {xp_to_level(user.xp)} - XP: {user.xp}" for user in users],
+        PAGE_SIZE,
+    )
     paginator = CustomEmbedPaginator(ctx, remove_reactions=True)
     paginator.add_reaction("⏪", "back")
     paginator.add_reaction("⏩", "next")
