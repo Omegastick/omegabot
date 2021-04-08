@@ -3,5 +3,4 @@
 .mypy_cache/
 .devcontainer/
 **/__pycache__/
-migrations/
 omegabot.db
