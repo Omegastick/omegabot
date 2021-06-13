@@ -18,7 +18,7 @@ PAGE_SIZE = 10
 
 
 @bot.command()
-@has_permissions(manage_guild=True)
+@has_permissions(manage_roles=True)
 async def give(ctx: Context, discord_user: DiscordUser, amount: int):
     LOG.info(f"Giving {amount} points to {discord_user.name}")
     command_user = get_or_create_user(ctx.author, ctx.guild)
@@ -32,7 +32,7 @@ async def give(ctx: Context, discord_user: DiscordUser, amount: int):
 
 
 @bot.command()
-@has_permissions(manage_guild=True)
+@has_permissions(manage_roles=True)
 async def set_leader_role(ctx: Context, role: DiscordRole):
     LOG.info(f"Setting point leader role role for guild {ctx.guild.name} to {role.name}")
     set_point_leader_role(role)
@@ -53,7 +53,7 @@ async def leaderboard(ctx: Context):
 
 
 @bot.command()
-@has_permissions(manage_guild=True)
+@has_permissions(manage_roles=True)
 async def welcome_message(ctx: Context, message: str):
     set_welcome_message(ctx.channel, message)
     await ctx.channel.send("Welcome message set")
