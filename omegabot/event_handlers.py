@@ -5,6 +5,7 @@ from discord.channel import TextChannel
 
 from omegabot.app import bot
 from omegabot.models import WelcomeMessage
+from omegabot.services.regular import check_and_apply_regular_role
 from omegabot.services.user import get_or_create_user
 from omegabot.services.xp import add_xp, xp_to_level
 
@@ -34,6 +35,8 @@ async def on_message(message: Message):
     new_level = xp_to_level(user.xp)
     if new_level > old_level:
         await message.channel.send(f"Congrats {message.author.mention}! You leveled up to level {new_level} 🎉")
+
+    await check_and_apply_regular_role(user, message.author)
 
     await bot.process_commands(message)
 

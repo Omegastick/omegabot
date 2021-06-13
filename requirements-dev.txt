@@ -1,3 +1,5 @@
-isort==5.8.0
-pytest==6.2.2
-pytest-asyncio==0.14.0
+isort
+flake8
+mypy
+pytest
+pytest-asyncio

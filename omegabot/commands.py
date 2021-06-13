@@ -8,6 +8,7 @@ from DiscordUtils.Pagination import CustomEmbedPaginator
 from omegabot.app import bot
 from omegabot.presentation import make_leaderboard
 from omegabot.services.points import add_points, recalculate_leader, set_point_leader_role
+from omegabot.services.regular import set_regular_role as set_regular_role_service
 from omegabot.services.user import get_leaderboard_users, get_or_create_user, get_xp_leaderboard_users
 from omegabot.services.welcome_message import set_welcome_message
 from omegabot.services.xp import level_to_xp, xp_to_level
@@ -34,7 +35,7 @@ async def give(ctx: Context, discord_user: DiscordUser, amount: int):
 @bot.command()
 @has_permissions(manage_roles=True)
 async def set_leader_role(ctx: Context, role: DiscordRole):
-    LOG.info(f"Setting point leader role role for guild {ctx.guild.name} to {role.name}")
+    LOG.info(f"Setting point leader role for guild {ctx.guild.name} to {role.name}")
     set_point_leader_role(role)
     await ctx.send(f"The role for the user with the most points is now {role.mention}")
 
@@ -88,3 +89,10 @@ async def xp_leaderboard(ctx: Context):
     paginator.add_reaction("⏪", "back")
     paginator.add_reaction("⏩", "next")
     await paginator.run(embeds)
+
+
+@bot.command()
+async def set_regular_role(ctx: Context, role: DiscordRole, delay_in_days: int):
+    LOG.info(f"Setting regular role for guild {ctx.guild.name} to {role.name} with a delay of {delay_in_days} days")
+    set_regular_role_service(role, delay_in_days)
+    await ctx.channel.send(f"Regular role set to {role.mention}")

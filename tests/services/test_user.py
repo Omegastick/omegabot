@@ -5,8 +5,7 @@ import pytest
 from discord import Guild
 from discord import User as DiscordUser
 from omegabot.models import User
-from omegabot.services.user import (get_leaderboard_users, get_or_create_user,
-                                    get_xp_leaderboard_users)
+from omegabot.services.user import get_leaderboard_users, get_or_create_user, get_xp_leaderboard_users
 
 USERNAME = "TEST_USERNAME"
 USER_ID = 123
