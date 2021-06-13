@@ -1,6 +1,5 @@
 .vscode/
 .pytest_cache/
 .mypy_cache/
-.devcontainer/
 **/__pycache__/
 omegabot.db
