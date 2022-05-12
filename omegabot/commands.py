@@ -113,6 +113,7 @@ async def enable_sentience(ctx: Context):
 
     while True:
         await asyncio.sleep(random.randint(3600, 86400))
+        LOG.info("Sending sentience message")
         message_history = await ctx.channel.history(limit=10).flatten()
         prompt = prepare_chatlog(message_history)
         prompt += f"\n{bot.user.mention}:"

@@ -1,9 +1,10 @@
-version: '3.7'
+version: "3.7"
 services:
   omegabot:
     build: .
     environment:
       DATABASE_FILE: "/app/omegabot.db"
       DISCORD_TOKEN: ${DISCORD_TOKEN}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     volumes:
       - ".:/app"
