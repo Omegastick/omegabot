@@ -5,6 +5,7 @@ from discord.channel import TextChannel
 
 from omegabot.app import bot
 from omegabot.models import WelcomeMessage
+from omegabot.services.openai import get_prediction, prepare_chatlog
 from omegabot.services.regular import check_and_apply_regular_role
 from omegabot.services.user import get_or_create_user
 from omegabot.services.xp import add_xp, xp_to_level
@@ -37,6 +38,15 @@ async def on_message(message: Message):
         await message.channel.send(f"Congrats {message.author.mention}! You leveled up to level {new_level} 🎉")
 
     await check_and_apply_regular_role(user, message.author)
+
+    for mention in message.mentions:
+        if mention.id == bot.user.id:
+            LOG.info(f"Replying to message {message.content}")
+            message_history = await message.channel.history(limit=10).flatten()
+            prompt = prepare_chatlog(message_history)
+            prompt += f"\n{bot.user.mention}:"
+            prediction = get_prediction(prompt, stop=["\n"])
+            await message.channel.send(prediction)
 
     await bot.process_commands(message)
 

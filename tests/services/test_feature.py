@@ -1,5 +1,5 @@
-from omegabot.models.feature import Feature
-from omegabot.services.feature import enable_feature_for_guild
+from omegabot.models.sentience import Feature
+from omegabot.services.sentience import enable_feature_for_guild
 
 
 def test_enable_feature_creates_new_row_if_none_exists():

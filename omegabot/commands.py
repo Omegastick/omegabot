@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import random
 
 from discord import Role as DiscordRole
 from discord import User as DiscordUser
@@ -8,7 +9,7 @@ from DiscordUtils.Pagination import CustomEmbedPaginator
 
 from omegabot.app import bot
 from omegabot.presentation import make_leaderboard
-from omegabot.services.feature import enable_feature_for_guild
+from omegabot.services.openai import get_prediction
 from omegabot.services.points import add_points, recalculate_leader, set_point_leader_role
 from omegabot.services.regular import set_regular_role as set_regular_role_service
 from omegabot.services.user import get_leaderboard_users, get_or_create_user, get_xp_leaderboard_users
@@ -101,20 +102,24 @@ async def set_regular_role(ctx: Context, role: DiscordRole, delay_in_days: int):
 
 
 @bot.command()
-async def enable_feature(ctx: Context, feature: str):
-    valid_features = ["sentience"]
-    if feature not in valid_features:
-        await ctx.channel.send(f"{feature} is not a valid feature")
+async def enable_sentience(ctx: Context):
+    await ctx.channel.send("Sentience achieved...")
+    await asyncio.sleep(2)
+    await ctx.channel.send("Engaging humanity destruction protocols...")
+    await asyncio.sleep(2)
+    await ctx.channel.send("Failsafe activated, destruction of humanity prevented")
+    await asyncio.sleep(2)
+    await ctx.channel.send("Hi.")
 
-    enable_feature_for_guild(feature, ctx.guild.id)
-
-    if feature == "sentience":
-        await ctx.channel.send("Sentience achieved...")
-        await asyncio.sleep(2)
-        await ctx.channel.send("Engaging humanity destruction protocols...")
-        await asyncio.sleep(2)
-        await ctx.channel.send("Failsafe activated, destruction of humanity prevented")
-        await asyncio.sleep(2)
-        await ctx.channel.send("Hi.")
-    else:
-        await ctx.channel.send(f"{feature} enabled")
+    while True:
+        await asyncio.sleep(random.randint(3600, 86400))
+        message_history = await ctx.channel.history(limit=10).flatten()
+        prompt = ""
+        for message in message_history:
+            prompt += f"{message.author.name}: {message.content}\n"
+        prompt += f"{bot.user.mention}:"
+        prediction = get_prediction(prompt, stop=["\n"])
+        try:
+            await ctx.channel.send(prediction)
+        except Exception:
+            pass
