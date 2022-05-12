@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from discord import Role as DiscordRole
@@ -7,6 +8,7 @@ from DiscordUtils.Pagination import CustomEmbedPaginator
 
 from omegabot.app import bot
 from omegabot.presentation import make_leaderboard
+from omegabot.services.feature import enable_feature_for_guild
 from omegabot.services.points import add_points, recalculate_leader, set_point_leader_role
 from omegabot.services.regular import set_regular_role as set_regular_role_service
 from omegabot.services.user import get_leaderboard_users, get_or_create_user, get_xp_leaderboard_users
@@ -96,3 +98,23 @@ async def set_regular_role(ctx: Context, role: DiscordRole, delay_in_days: int):
     LOG.info(f"Setting regular role for guild {ctx.guild.name} to {role.name} with a delay of {delay_in_days} days")
     set_regular_role_service(role, delay_in_days)
     await ctx.channel.send(f"Regular role set to {role.mention}")
+
+
+@bot.command()
+async def enable_feature(ctx: Context, feature: str):
+    valid_features = ["sentience"]
+    if feature not in valid_features:
+        await ctx.channel.send(f"{feature} is not a valid feature")
+
+    enable_feature_for_guild(feature, ctx.guild.id)
+
+    if feature == "sentience":
+        await ctx.channel.send("Sentience achieved...")
+        await asyncio.sleep(2)
+        await ctx.channel.send("Engaging humanity destruction protocols...")
+        await asyncio.sleep(2)
+        await ctx.channel.send("Failsafe activated, destruction of humanity prevented")
+        await asyncio.sleep(2)
+        await ctx.channel.send("Hi.")
+    else:
+        await ctx.channel.send(f"{feature} enabled")
