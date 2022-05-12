@@ -9,7 +9,7 @@ from DiscordUtils.Pagination import CustomEmbedPaginator
 
 from omegabot.app import bot
 from omegabot.presentation import make_leaderboard
-from omegabot.services.openai import get_prediction
+from omegabot.services.openai import get_prediction, prepare_chatlog
 from omegabot.services.points import add_points, recalculate_leader, set_point_leader_role
 from omegabot.services.regular import set_regular_role as set_regular_role_service
 from omegabot.services.user import get_leaderboard_users, get_or_create_user, get_xp_leaderboard_users
@@ -114,10 +114,8 @@ async def enable_sentience(ctx: Context):
     while True:
         await asyncio.sleep(random.randint(3600, 86400))
         message_history = await ctx.channel.history(limit=10).flatten()
-        prompt = ""
-        for message in message_history:
-            prompt += f"{message.author.name}: {message.content}\n"
-        prompt += f"{bot.user.mention}:"
+        prompt = prepare_chatlog(message_history)
+        prompt += f"\n{bot.user.mention}:"
         prediction = get_prediction(prompt, stop=["\n"])
         try:
             await ctx.channel.send(prediction)
