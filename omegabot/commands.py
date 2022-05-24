@@ -9,7 +9,13 @@ from DiscordUtils.Pagination import CustomEmbedPaginator
 
 from omegabot.app import bot
 from omegabot.presentation import make_leaderboard
-from omegabot.services.openai import get_prediction, prepare_chatlog
+from omegabot.services.openai import (
+    convert_mentions_to_names,
+    convert_names_to_mentions,
+    create_name_mention_mapping_from_history,
+    get_prediction,
+    prepare_chatlog,
+)
 from omegabot.services.points import add_points, recalculate_leader, set_point_leader_role
 from omegabot.services.regular import set_regular_role as set_regular_role_service
 from omegabot.services.user import get_leaderboard_users, get_or_create_user, get_xp_leaderboard_users
@@ -112,12 +118,17 @@ async def enable_sentience(ctx: Context):
     await ctx.channel.send("Hi.")
 
     while True:
-        await asyncio.sleep(random.randint(3600, 86400))
+        sleep_time = random.randint(3600, 86400)
+        LOG.info(f"Sleeping for {float(sleep_time) / 60 / 60} hours")
+        await asyncio.sleep(sleep_time)
         LOG.info("Sending sentience message")
         message_history = await ctx.channel.history(limit=10).flatten()
+        name_mention_mapping = create_name_mention_mapping_from_history(message_history)
         prompt = prepare_chatlog(message_history)
         prompt += f"\n{bot.user.mention}:"
+        prompt = convert_mentions_to_names(prompt, name_mention_mapping)
         prediction = get_prediction(prompt, stop=["\n"])
+        prediction = convert_names_to_mentions(prediction, name_mention_mapping)
         try:
             await ctx.channel.send(prediction)
         except Exception:

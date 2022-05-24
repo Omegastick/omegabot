@@ -5,7 +5,8 @@ from discord.channel import TextChannel
 
 from omegabot.app import bot
 from omegabot.models import WelcomeMessage
-from omegabot.services.openai import get_prediction, prepare_chatlog
+from omegabot.services.openai import (convert_mentions_to_names, convert_names_to_mentions,
+                                      create_name_mention_mapping_from_history, get_prediction, prepare_chatlog)
 from omegabot.services.regular import check_and_apply_regular_role
 from omegabot.services.user import get_or_create_user
 from omegabot.services.xp import add_xp, xp_to_level
@@ -43,9 +44,13 @@ async def on_message(message: Message):
         if mention.id == bot.user.id:
             LOG.info(f"Replying to message {message.content}")
             message_history = await message.channel.history(limit=10).flatten()
+            name_mention_mapping = create_name_mention_mapping_from_history(message_history)
             prompt = prepare_chatlog(message_history)
             prompt += f"\n{bot.user.mention}:"
+            prompt = convert_mentions_to_names(prompt, name_mention_mapping)
             prediction = get_prediction(prompt, stop=["\n"])
+            prediction = convert_names_to_mentions(prediction, name_mention_mapping)
+            LOG.info(f"Sending message: {prediction}")
             await message.channel.send(prediction)
 
     await bot.process_commands(message)
